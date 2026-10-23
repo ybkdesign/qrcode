@@ -1,0 +1,143 @@
+{
+  "clients": {
+    "cli_1789823299416_8573c0": {
+      "name": "YBK Design",
+      "companyName": "YBK Design Co., Ltd.",
+      "contactPerson": "Yabiko Alexandre",
+      "email": "contact@linksybk.com",
+      "phone": "+81-070-7549-5217",
+      "postalCode": "",
+      "prefecture": "Gunma",
+      "city": "Oura-Gun Oizumi-Machi Yoshida ",
+      "address": "1506-4",
+      "building": "",
+      "country": "Japão",
+      "notes": "",
+      "logoUrl": "/uploads/logos/ybk_design_logo.svg",
+      "status": "active",
+      "id": "cli_1789823299416_8573c0",
+      "createdAt": "2026-09-19T13:08:19.417Z",
+      "updatedAt": "2026-10-12T08:04:35.443Z",
+      "password": "minhaNovaSenha2026!"
+    },
+    "cli_1791609452016_b7f6cb": {
+      "name": "Vilma Baia",
+      "companyName": "Vilma Baia",
+      "contactPerson": "Vilma",
+      "email": "vilmabaia@icloud.com",
+      "phone": "+8108069248133",
+      "postalCode": "3700523",
+      "prefecture": "Gunma",
+      "city": "",
+      "address": "",
+      "building": "",
+      "country": "Japão",
+      "notes": "",
+      "logoUrl": "/uploads/logos/vilma_baia_logo.svg",
+      "status": "active",
+      "password": "Manu@10091994",
+      "id": "cli_1791609452016_b7f6cb",
+      "createdAt": "2026-10-10T05:17:32.017Z",
+      "updatedAt": "2026-10-10T09:04:33.890Z"
+    },
+    "cli_1791613024858_1a7802": {
+      "name": "Wanka Interia",
+      "companyName": "Wanka Interia",
+      "contactPerson": "Joel",
+      "email": "joel@joel.com",
+      "phone": "",
+      "postalCode": "",
+      "prefecture": "Tóquio",
+      "city": "",
+      "address": "",
+      "building": "",
+      "country": "Japão",
+      "notes": "",
+      "logoUrl": "/uploads/logos/wanka_interia_logo.svg",
+      "status": "active",
+      "password": "Wanka123",
+      "id": "cli_1791613024858_1a7802",
+      "createdAt": "2026-10-10T06:17:04.859Z",
+      "updatedAt": "2026-10-10T06:17:04.859Z"
+    }
+  },
+  "qrcodes": {
+    "qr_1792241569880_5be6a2": {
+      "name": "YBK Instagram",
+      "clientId": "cli_1789823299416_8573c0",
+      "type": "instagram",
+      "destinationUrl": "https://ybkdesign.linksybk.com",
+      "shortCode": "ybk-insta",
+      "status": "active",
+      "notes": "",
+      "style": {
+        "foregroundColor": "#0f172a",
+        "backgroundColor": "#ffffff",
+        "dotType": "square",
+        "eyeFrame": "rounded",
+        "eyeBall": "rounded",
+        "margin": 2,
+        "size": 512
+      },
+      "id": "qr_1792241569880_5be6a2",
+      "clientName": "YBK Design",
+      "scanCount": 0,
+      "createdAt": "2026-10-17T12:52:49.880Z",
+      "updatedAt": "2026-10-18T12:04:28.334Z"
+    },
+    "qr_1792241800292_7b8e6d": {
+      "name": "VB-Instagram",
+      "clientId": "cli_1791609452016_b7f6cb",
+      "type": "instagram",
+      "destinationUrl": "https://vilmabaia.linksybk.com;links",
+      "shortCode": "vb-instagram",
+      "status": "active",
+      "notes": "",
+      "style": {
+        "foregroundColor": "#0f172a",
+        "backgroundColor": "#ffffff",
+        "dotType": "square",
+        "eyeFrame": "rounded",
+        "eyeBall": "rounded",
+        "margin": 2,
+        "size": 512
+      },
+      "id": "qr_1792241800292_7b8e6d",
+      "clientName": "Vilma Baia",
+      "scanCount": 0,
+      "createdAt": "2026-10-17T12:56:40.292Z",
+      "updatedAt": "2026-10-17T12:56:40.293Z"
+    },
+    "qr_1792241889231_4505c5": {
+      "name": "VB Site Instagram",
+      "clientId": "cli_1791609452016_b7f6cb",
+      "type": "instagram",
+      "destinationUrl": "https://vilmabaia.linksybk.com",
+      "shortCode": "vb",
+      "status": "active",
+      "notes": "",
+      "style": {
+        "foregroundColor": "#0f172a",
+        "backgroundColor": "#ffffff",
+        "dotType": "square",
+        "eyeFrame": "rounded",
+        "eyeBall": "rounded",
+        "margin": 2,
+        "size": 512
+      },
+      "id": "qr_1792241889231_4505c5",
+      "clientName": "Vilma Baia",
+      "scanCount": 0,
+      "createdAt": "2026-10-17T12:58:09.232Z",
+      "updatedAt": "2026-10-17T12:58:09.232Z"
+    }
+  },
+  "lastUpdated": "2026-10-18T12:04:28.334Z",
+  "adminUser": {
+    "id": "usr_admin_1",
+    "name": "Alexandre Yabiko",
+    "email": "ybkdesign@icloud.com",
+    "password": "Manu@QR@10091994",
+    "updatedAt": "2026-10-10T06:45:11.833Z"
+  }
+}

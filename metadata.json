@@ -1,0 +1,8 @@
+{
+  "name": "QR Dynamic Hub - Gestão de QR Codes e Clientes",
+  "description": "Plataforma completa para criação, gerenciamento e manutenção de QR Codes dinâmicos com gestão de clientes e analytics em tempo real.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
