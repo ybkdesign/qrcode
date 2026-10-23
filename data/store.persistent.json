@@ -1,6 +1,44 @@
 {
   "clients": [
     {
+      "name": "Restaurante Sakura Prime",
+      "companyName": "Sakura Prime Gastronomia Ltda",
+      "contactPerson": "Restaurante Sakura Prime",
+      "email": "sakura@sakura.jp",
+      "phone": "",
+      "postalCode": "",
+      "prefecture": "Tóquio",
+      "city": "",
+      "address": "",
+      "building": "",
+      "country": "Japão",
+      "notes": "",
+      "logoUrl": "/uploads/logos/cli_cli_1792765581863_62b028_logo.svg",
+      "status": "active",
+      "id": "cli_1792765581863_62b028",
+      "createdAt": "2026-10-23T14:26:21.863Z",
+      "updatedAt": "2026-10-23T14:26:21.863Z"
+    },
+    {
+      "name": "Cliente Teste Persistencia",
+      "companyName": "Empresa Teste",
+      "contactPerson": "Cliente Teste Persistencia",
+      "email": "teste@persistencia.com",
+      "phone": "",
+      "postalCode": "",
+      "prefecture": "",
+      "city": "",
+      "address": "",
+      "building": "",
+      "country": "Japão",
+      "notes": "",
+      "logoUrl": "/uploads/logos/cli_cli_1792765222069_0889d5_logo.svg",
+      "status": "active",
+      "id": "cli_1792765222069_0889d5",
+      "createdAt": "2026-10-23T14:20:22.069Z",
+      "updatedAt": "2026-10-23T14:20:22.069Z"
+    },
+    {
       "name": "Wanka Interia",
       "companyName": "Wanka Interia",
       "contactPerson": "Joel",
@@ -62,6 +100,52 @@
     }
   ],
   "qrcodes": [
+    {
+      "name": "Cardápio QR Teste Almoço",
+      "clientId": "cli_1792765581863_62b028",
+      "type": "website",
+      "destinationUrl": "https://sakura.jp/cardapio",
+      "shortCode": "sakura-cardapio",
+      "status": "inactive",
+      "notes": "",
+      "style": {
+        "foregroundColor": "#0f172a",
+        "backgroundColor": "#ffffff",
+        "dotType": "rounded",
+        "eyeFrame": "rounded",
+        "eyeBall": "rounded",
+        "margin": 2,
+        "size": 512
+      },
+      "id": "qr_1792765591010_c34f1b",
+      "clientName": "Restaurante Sakura Prime",
+      "scanCount": 0,
+      "createdAt": "2026-10-23T14:26:31.010Z",
+      "updatedAt": "2026-10-23T14:27:02.503Z"
+    },
+    {
+      "name": "Menu Especial Restaurante",
+      "clientId": "cli_1792765222069_0889d5",
+      "type": "website",
+      "destinationUrl": "https://menu-especial.com",
+      "shortCode": "menu-especial",
+      "status": "active",
+      "notes": "",
+      "style": {
+        "foregroundColor": "#0f172a",
+        "backgroundColor": "#ffffff",
+        "dotType": "rounded",
+        "eyeFrame": "rounded",
+        "eyeBall": "rounded",
+        "margin": 2,
+        "size": 512
+      },
+      "id": "qr_1792765261939_5785c0",
+      "clientName": "Cliente Teste Persistencia",
+      "scanCount": 0,
+      "createdAt": "2026-10-23T14:21:01.939Z",
+      "updatedAt": "2026-10-23T14:21:01.939Z"
+    },
     {
       "name": "VB Site Instagram",
       "clientId": "cli_1791609452016_b7f6cb",
@@ -134,6 +218,72 @@
   ],
   "scans": [],
   "history": [
+    {
+      "id": "hist_1792765622504_8c59",
+      "timestamp": "2026-10-23T14:27:02.504Z",
+      "userId": "usr_admin",
+      "action": "qr_deactivated",
+      "title": "QR Code pausado",
+      "description": "QR Code \"Cardápio QR Teste Almoço\" agora está pausado.",
+      "userName": "Administrador",
+      "targetId": "qr_1792765591010_c34f1b",
+      "targetType": "qrcode"
+    },
+    {
+      "id": "hist_1792765591011_a9d4",
+      "timestamp": "2026-10-23T14:26:31.011Z",
+      "userId": "usr_admin",
+      "action": "qr_created",
+      "title": "QR Code dinâmico criado",
+      "description": "QR Code \"Cardápio QR Teste Almoço\" criado para o cliente \"Restaurante Sakura Prime\". Destino: https://sakura.jp/cardapio",
+      "userName": "Administrador",
+      "targetId": "qr_1792765591010_c34f1b",
+      "targetType": "qrcode"
+    },
+    {
+      "id": "hist_1792765581864_fea3",
+      "timestamp": "2026-10-23T14:26:21.864Z",
+      "userId": "usr_admin",
+      "action": "client_created",
+      "title": "Novo cliente cadastrado",
+      "description": "Cliente \"Restaurante Sakura Prime\" cadastrado com sucesso.",
+      "userName": "Administrador",
+      "targetId": "cli_1792765581863_62b028",
+      "targetType": "client"
+    },
+    {
+      "id": "hist_1792765261940_6be2",
+      "timestamp": "2026-10-23T14:21:01.940Z",
+      "userId": "usr_admin",
+      "action": "qr_created",
+      "title": "QR Code dinâmico criado",
+      "description": "QR Code \"Menu Especial Restaurante\" criado para o cliente \"Cliente Teste Persistencia\". Destino: https://menu-especial.com",
+      "userName": "Administrador",
+      "targetId": "qr_1792765261939_5785c0",
+      "targetType": "qrcode"
+    },
+    {
+      "id": "hist_1792765229971_7cb8",
+      "timestamp": "2026-10-23T14:20:29.971Z",
+      "userId": "usr_admin",
+      "action": "qr_created",
+      "title": "QR Code dinâmico criado",
+      "description": "QR Code \"QR Teste Persistente\" criado para o cliente \"Cliente Teste Persistencia\". Destino: https://teste-persistente.com",
+      "userName": "Administrador",
+      "targetId": "qr_1792765229971_b248d3",
+      "targetType": "qrcode"
+    },
+    {
+      "id": "hist_1792765222070_10d9",
+      "timestamp": "2026-10-23T14:20:22.070Z",
+      "userId": "usr_admin",
+      "action": "client_created",
+      "title": "Novo cliente cadastrado",
+      "description": "Cliente \"Cliente Teste Persistencia\" cadastrado com sucesso.",
+      "userName": "Administrador",
+      "targetId": "cli_1792765222069_0889d5",
+      "targetType": "client"
+    },
     {
       "id": "hist_1792325068334_144b",
       "timestamp": "2026-10-18T12:04:28.334Z",

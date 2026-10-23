@@ -119,23 +119,15 @@ export default function App() {
         api.getHistory(),
         api.getSettings(),
       ]);
-      // Filtro estrito: jamais incluir clientes fictícios ou de teste
+      // Filtro estrito: jamais incluir cliente fictício legado
       const isFictional = (c: any) =>
-        !c ||
-        c.id === 'cli_1791623610427_47d40b' ||
-        c.name === 'Tokyo Coffee Lab' ||
-        c.name === 'Restaurante Sabor & Arte Tokyo';
+        !c || c.id === 'cli_1791623610427_47d40b';
 
-      // Regra estrita: NUNCA tolerar QR codes de teste (ex: teste-persistencia, teste-wanka)
+      // Regra estrita: apenas excluir códigos dummy legados, mantendo 100% dos QR codes criados pelo usuário
       const isTestQR = (q: any) =>
         !q ||
         q.id === 'qr_1791791581792_f83bb1' ||
-        q.id === 'qr_1791970083519_347d8f' ||
-        q.shortCode === 'teste-persistencia' ||
-        q.shortCode === 'teste-wanka' ||
-        q.name === 'QR Teste Persistencia' ||
-        q.name === 'QR Teste Integridade' ||
-        (typeof q.name === 'string' && q.name.toLowerCase().startsWith('qr teste'));
+        q.id === 'qr_1791970083519_347d8f';
 
       const validClientsData = (clientsData || []).filter((c: any) => !isFictional(c));
       const validQRsData = (qrcodesData || []).filter((q: any) => !isTestQR(q));
@@ -424,15 +416,24 @@ export default function App() {
     }
 
     try {
+      // 1. Desmarcar o id de qualquer lista de deletados
+      const deletedList = JSON.parse(localStorage.getItem('qr_deleted_ids_cache') || '[]');
+      const cleanDeletedList = deletedList.filter((did: string) => did !== savedQR.id);
+      localStorage.setItem('qr_deleted_ids_cache', JSON.stringify(cleanDeletedList));
+
+      // 2. Persistir imediatamente no cache local
       const stored = JSON.parse(localStorage.getItem('qr_persistent_qrcodes_cache') || '[]');
-      const exists = stored.some((q: any) => q.id === savedQR.id);
-      const nextList = exists
-        ? stored.map((q: any) => (q.id === savedQR.id ? savedQR : q))
-        : [savedQR, ...stored];
+      const nextList = [savedQR, ...stored.filter((q: any) => q.id !== savedQR.id)];
       localStorage.setItem('qr_persistent_qrcodes_cache', JSON.stringify(nextList));
+
+      // 3. Sincronizar com o banco de dados do servidor
+      await api.syncCreatedEntities({ qrcodes: [savedQR] });
     } catch (e) {
       console.warn('Erro ao atualizar cache local de QR Codes:', e);
     }
+
+    // 4. Recarregar dados consolidados
+    await loadAppData();
   };
 
   const handleToggleQRStatus = async (id: string) => {
@@ -608,13 +609,13 @@ export default function App() {
             'qr_persistent_clients_cache',
             JSON.stringify([created, ...stored.filter((c: any) => c.id !== created.id)])
           );
-          api.syncCreatedEntities({ clients: [created] }).catch(() => {});
+          await api.syncCreatedEntities({ clients: [created] });
         } catch (e) {
           console.warn('Erro ao salvar novo cliente no cache local:', e);
         }
         showToast('Novo cliente cadastrado com sucesso!');
       }
-      loadAppData();
+      await loadAppData();
     } catch (err: any) {
       showToast(err.message || 'Erro ao salvar cliente.', 'error');
       throw err;

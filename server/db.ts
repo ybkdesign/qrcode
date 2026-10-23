@@ -678,22 +678,15 @@ class Database {
     if (!Array.isArray(baseData.history)) baseData.history = [];
     if (!baseData.settings) baseData.settings = { ...defaultSettings };
 
-    // Purga imediata de clientes fictícios ou de teste (ex: Tokyo Coffee Lab)
+    // Purga apenas o cliente fictício dummy legado
     const isFictional = (id?: string, name?: string) =>
-      id === 'cli_1791623610427_47d40b' ||
-      name === 'Tokyo Coffee Lab' ||
-      name === 'Restaurante Sabor & Arte Tokyo';
+      id === 'cli_1791623610427_47d40b';
 
-    // Regra estrita: NUNCA inserir ou tolerar QR codes de teste
+    // Purga apenas os códigos dummy de teste legados, preservando todos os QR codes criados pelo usuário
     const isTestQR = (q?: any) =>
       !q ||
       q.id === 'qr_1791791581792_f83bb1' ||
-      q.id === 'qr_1791970083519_347d8f' ||
-      q.shortCode === 'teste-persistencia' ||
-      q.shortCode === 'teste-wanka' ||
-      q.name === 'QR Teste Persistencia' ||
-      q.name === 'QR Teste Integridade' ||
-      (typeof q.name === 'string' && q.name.toLowerCase().startsWith('qr teste'));
+      q.id === 'qr_1791970083519_347d8f';
 
     baseData.clients = baseData.clients.filter((c) => !isFictional(c.id, c.name));
     baseData.qrcodes = baseData.qrcodes.filter((q) => !isTestQR(q));
@@ -902,6 +895,24 @@ class Database {
       registry.adminUser = { ...baseData.adminUser };
     }
 
+    // Sincronizar MASTER_ADMIN_CREATED_ENTITIES em memória com todos os clientes e QR codes carregados
+    baseData.clients.forEach((c) => {
+      const idx = MASTER_ADMIN_CREATED_ENTITIES.clients.findIndex((mc) => mc.id === c.id);
+      if (idx >= 0) {
+        MASTER_ADMIN_CREATED_ENTITIES.clients[idx] = { ...c };
+      } else {
+        MASTER_ADMIN_CREATED_ENTITIES.clients.push({ ...c });
+      }
+    });
+    baseData.qrcodes.forEach((q) => {
+      const idx = MASTER_ADMIN_CREATED_ENTITIES.qrcodes.findIndex((mq) => mq.id === q.id);
+      if (idx >= 0) {
+        MASTER_ADMIN_CREATED_ENTITIES.qrcodes[idx] = { ...q };
+      } else {
+        MASTER_ADMIN_CREATED_ENTITIES.qrcodes.push({ ...q });
+      }
+    });
+
     this.saveRegistry(registry);
     this.saveData(baseData);
     return baseData;
@@ -910,14 +921,23 @@ class Database {
   private saveData(dataToSave?: DatabaseSchema) {
     try {
       const data = dataToSave || this.data;
+      if (Array.isArray(data?.clients)) {
+        data.clients.forEach((c) => {
+          const idx = MASTER_ADMIN_CREATED_ENTITIES.clients.findIndex((mc) => mc.id === c.id);
+          if (idx >= 0) {
+            MASTER_ADMIN_CREATED_ENTITIES.clients[idx] = { ...c };
+          } else {
+            MASTER_ADMIN_CREATED_ENTITIES.clients.push({ ...c });
+          }
+        });
+      }
       if (Array.isArray(data?.qrcodes)) {
         data.qrcodes.forEach((q) => {
-          const master = MASTER_ADMIN_CREATED_ENTITIES.qrcodes.find((mq) => mq.id === q.id);
-          if (master) {
-            master.shortCode = q.shortCode;
-            master.destinationUrl = q.destinationUrl;
-            master.name = q.name;
-            master.status = q.status;
+          const idx = MASTER_ADMIN_CREATED_ENTITIES.qrcodes.findIndex((mq) => mq.id === q.id);
+          if (idx >= 0) {
+            MASTER_ADMIN_CREATED_ENTITIES.qrcodes[idx] = { ...q };
+          } else {
+            MASTER_ADMIN_CREATED_ENTITIES.qrcodes.push({ ...q });
           }
         });
       }
@@ -945,6 +965,19 @@ class Database {
         fs.writeFileSync(MASTER_SNAPSHOT_FILE, masterSnapshotContent, 'utf-8');
       } catch (err) {
         console.error('Error saving master snapshot file:', err);
+      }
+      try {
+        const reg = this.loadRegistry();
+        (data.clients || []).forEach((c) => {
+          if (c && c.id) reg.clients[c.id] = { ...c };
+        });
+        (data.qrcodes || []).forEach((q) => {
+          if (q && q.id) reg.qrcodes[q.id] = { ...q };
+        });
+        reg.lastUpdated = new Date().toISOString();
+        fs.writeFileSync(CREATED_REGISTRY_FILE, JSON.stringify(reg, null, 2), 'utf-8');
+      } catch (err) {
+        console.error('Error saving created registry file on saveData:', err);
       }
     } catch (err) {
       console.error('Error saving data to file:', err);
@@ -974,11 +1007,9 @@ class Database {
     // 1. GARANTIA ABSOLUTA: Sincronizar clientes reais com preservação de LOGOS e sem clientes fictícios
     const registry = this.loadRegistry();
 
-    // Eliminar qualquer cliente fictício ou de teste (ex: Tokyo Coffee Lab)
-    const isFictional = (id?: string, name?: string) =>
-      id === 'cli_1791623610427_47d40b' ||
-      name === 'Tokyo Coffee Lab' ||
-      name === 'Restaurante Sabor & Arte Tokyo';
+    // Eliminar apenas o cliente fictício dummy legado
+    const isFictional = (id?: string, _name?: string) =>
+      id === 'cli_1791623610427_47d40b';
 
     this.data.clients = this.data.clients.filter((c) => !isFictional(c.id, c.name));
     if (registry.clients) {
@@ -1113,9 +1144,7 @@ class Database {
     let syncedQRCodes = 0;
 
     const isFictional = (id?: string, name?: string) =>
-      id === 'cli_1791623610427_47d40b' ||
-      name === 'Tokyo Coffee Lab' ||
-      name === 'Restaurante Sabor & Arte Tokyo';
+      id === 'cli_1791623610427_47d40b';
 
     if (Array.isArray(clients) && clients.length > 0) {
       clients.forEach((c) => {
@@ -1162,12 +1191,7 @@ class Database {
     const isTestQR = (q?: any) =>
       !q ||
       q.id === 'qr_1791791581792_f83bb1' ||
-      q.id === 'qr_1791970083519_347d8f' ||
-      q.shortCode === 'teste-persistencia' ||
-      q.shortCode === 'teste-wanka' ||
-      q.name === 'QR Teste Persistencia' ||
-      q.name === 'QR Teste Integridade' ||
-      (typeof q.name === 'string' && q.name.toLowerCase().startsWith('qr teste'));
+      q.id === 'qr_1791970083519_347d8f';
 
     const deletedRegistry = this.loadDeletedRegistry();
 
