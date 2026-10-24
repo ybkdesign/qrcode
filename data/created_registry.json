@@ -17,7 +17,7 @@
       "status": "active",
       "id": "cli_1789823299416_8573c0",
       "createdAt": "2026-09-19T13:08:19.417Z",
-      "updatedAt": "2026-10-12T08:04:35.443Z",
+      "updatedAt": "2026-10-24T08:53:44.596Z",
       "password": "minhaNovaSenha2026!"
     },
     "cli_1791609452016_b7f6cb": {
@@ -59,44 +59,6 @@
       "id": "cli_1791613024858_1a7802",
       "createdAt": "2026-10-10T06:17:04.859Z",
       "updatedAt": "2026-10-10T06:17:04.859Z"
-    },
-    "cli_1792765222069_0889d5": {
-      "name": "Cliente Teste Persistencia",
-      "companyName": "Empresa Teste",
-      "contactPerson": "Cliente Teste Persistencia",
-      "email": "teste@persistencia.com",
-      "phone": "",
-      "postalCode": "",
-      "prefecture": "",
-      "city": "",
-      "address": "",
-      "building": "",
-      "country": "Japão",
-      "notes": "",
-      "logoUrl": "/uploads/logos/cli_cli_1792765222069_0889d5_logo.svg",
-      "status": "active",
-      "id": "cli_1792765222069_0889d5",
-      "createdAt": "2026-10-23T14:20:22.069Z",
-      "updatedAt": "2026-10-23T14:20:22.069Z"
-    },
-    "cli_1792765581863_62b028": {
-      "name": "Restaurante Sakura Prime",
-      "companyName": "Sakura Prime Gastronomia Ltda",
-      "contactPerson": "Restaurante Sakura Prime",
-      "email": "sakura@sakura.jp",
-      "phone": "",
-      "postalCode": "",
-      "prefecture": "Tóquio",
-      "city": "",
-      "address": "",
-      "building": "",
-      "country": "Japão",
-      "notes": "",
-      "logoUrl": "/uploads/logos/cli_cli_1792765581863_62b028_logo.svg",
-      "status": "active",
-      "id": "cli_1792765581863_62b028",
-      "createdAt": "2026-10-23T14:26:21.863Z",
-      "updatedAt": "2026-10-23T14:26:21.863Z"
     }
   },
   "qrcodes": {
@@ -168,55 +130,9 @@
       "scanCount": 0,
       "createdAt": "2026-10-17T12:58:09.232Z",
       "updatedAt": "2026-10-17T12:58:09.232Z"
-    },
-    "qr_1792765261939_5785c0": {
-      "name": "Menu Especial Restaurante",
-      "clientId": "cli_1792765222069_0889d5",
-      "type": "website",
-      "destinationUrl": "https://menu-especial.com",
-      "shortCode": "menu-especial",
-      "status": "active",
-      "notes": "",
-      "style": {
-        "foregroundColor": "#0f172a",
-        "backgroundColor": "#ffffff",
-        "dotType": "rounded",
-        "eyeFrame": "rounded",
-        "eyeBall": "rounded",
-        "margin": 2,
-        "size": 512
-      },
-      "id": "qr_1792765261939_5785c0",
-      "clientName": "Cliente Teste Persistencia",
-      "scanCount": 0,
-      "createdAt": "2026-10-23T14:21:01.939Z",
-      "updatedAt": "2026-10-23T14:21:01.939Z"
-    },
-    "qr_1792765591010_c34f1b": {
-      "name": "Cardápio QR Teste Almoço",
-      "clientId": "cli_1792765581863_62b028",
-      "type": "website",
-      "destinationUrl": "https://sakura.jp/cardapio",
-      "shortCode": "sakura-cardapio",
-      "status": "inactive",
-      "notes": "",
-      "style": {
-        "foregroundColor": "#0f172a",
-        "backgroundColor": "#ffffff",
-        "dotType": "rounded",
-        "eyeFrame": "rounded",
-        "eyeBall": "rounded",
-        "margin": 2,
-        "size": 512
-      },
-      "id": "qr_1792765591010_c34f1b",
-      "clientName": "Restaurante Sakura Prime",
-      "scanCount": 0,
-      "createdAt": "2026-10-23T14:26:31.010Z",
-      "updatedAt": "2026-10-23T14:27:02.503Z"
     }
   },
-  "lastUpdated": "2026-10-23T14:27:02.506Z",
+  "lastUpdated": "2026-10-24T08:53:44.598Z",
   "adminUser": {
     "id": "usr_admin_1",
     "name": "Alexandre Yabiko",

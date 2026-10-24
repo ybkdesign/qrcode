@@ -18,6 +18,7 @@ const PERSISTENT_SNAPSHOT_FILE = path.join(DATA_DIR, 'store.persistent.json');
 const CREATED_REGISTRY_FILE = path.join(DATA_DIR, 'created_registry.json');
 const MASTER_SNAPSHOT_FILE = path.join(DATA_DIR, 'master_snapshot.json');
 const DELETED_REGISTRY_FILE = path.join(DATA_DIR, 'deleted_registry.json');
+const LOGOS_REGISTRY_FILE = path.join(DATA_DIR, 'logos_registry.json');
 
 export interface CreatedRegistry {
   clients: Record<string, Client>;
@@ -444,20 +445,7 @@ class Database {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
 
-    // 1. Check MASTER_ADMIN_CREATED_ENTITIES first for designated logos
-    const master = MASTER_ADMIN_CREATED_ENTITIES.clients.find(
-      (m) => m.id === client.id || m.name.toLowerCase() === client.name.toLowerCase()
-    );
-    if (master && master.logoUrl) {
-      const masterPath = path.join(process.cwd(), 'data', master.logoUrl.replace(/^\//, ''));
-      if (fs.existsSync(masterPath)) {
-        if (!client.logoUrl || client.logoUrl.trim() === '' || client.logoUrl.includes('cli_cli_')) {
-          return master.logoUrl;
-        }
-      }
-    }
-
-    // 2. If client already has a valid logoUrl:
+    // 1. If client already has a valid logoUrl, PRESERVE IT!
     if (client.logoUrl && client.logoUrl.trim() !== '') {
       const url = client.logoUrl.trim();
       if (url.startsWith('/uploads/')) {
@@ -465,37 +453,44 @@ class Database {
         if (fs.existsSync(localPath)) {
           return url;
         }
+        // Auto-recuperação caso o arquivo binário tenha sido limpo entre reinicializações
+        try {
+          if (fs.existsSync(LOGOS_REGISTRY_FILE)) {
+            const logosReg = JSON.parse(fs.readFileSync(LOGOS_REGISTRY_FILE, 'utf-8'));
+            if (logosReg && typeof logosReg[url] === 'string' && logosReg[url].length > 0) {
+              const parentDir = path.dirname(localPath);
+              if (!fs.existsSync(parentDir)) {
+                fs.mkdirSync(parentDir, { recursive: true });
+              }
+              fs.writeFileSync(localPath, Buffer.from(logosReg[url], 'base64'));
+              return url;
+            }
+          }
+        } catch (restoreErr) {
+          console.warn('Error restoring logo from logos_registry:', restoreErr);
+        }
       } else if (url.startsWith('http://') || url.startsWith('https://')) {
         return url;
       } else if (url.startsWith('data:') || url.startsWith('<svg')) {
-        return this.saveImageToUploads(url, `cli_${client.id}`);
+        return this.saveImageToUploads(url, client.id);
       }
     }
 
-    if (master && master.logoUrl) {
+    // 2. Only if no logo is provided: check if baseline client has an existing file
+    const master = MASTER_ADMIN_CREATED_ENTITIES.clients.find((m) => m.id === client.id);
+    if (master && master.logoUrl && master.logoUrl.trim() !== '') {
       const masterPath = path.join(process.cwd(), 'data', master.logoUrl.replace(/^\//, ''));
       if (fs.existsSync(masterPath)) {
         return master.logoUrl;
       }
     }
 
-    // 3. Check if matching SVG file exists in uploads/logos
+    // 3. Fallback: generate high-quality SVG monogram logo
     const cleanId = client.id.replace(/[^a-zA-Z0-9_-]/g, '_');
-    const specificFile = path.join(uploadDir, `cli_${cleanId}_logo.svg`);
-    if (fs.existsSync(specificFile)) {
-      return `/uploads/logos/cli_${cleanId}_logo.svg`;
-    }
-
-    const cleanName = client.name.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    const nameFile = path.join(uploadDir, `${cleanName}_logo.svg`);
-    if (fs.existsSync(nameFile)) {
-      return `/uploads/logos/${cleanName}_logo.svg`;
-    }
-
-    // 4. Generate SVG logo and save to disk
+    const specificFile = path.join(uploadDir, `${cleanId}_logo.svg`);
     const svgContent = this.generateClientLogoSvg(client.name, client.companyName);
     fs.writeFileSync(specificFile, svgContent, 'utf-8');
-    return `/uploads/logos/cli_${cleanId}_logo.svg`;
+    return `/uploads/logos/${cleanId}_logo.svg`;
   }
 
   public saveImageToUploads(dataUrlOrBuffer: string, prefix = 'logo'): string {
@@ -546,7 +541,20 @@ class Database {
       const filename = `${cleanPrefix}_${Date.now()}_${crypto.randomBytes(3).toString('hex')}.${ext}`;
       const filePath = path.join(uploadDir, filename);
       fs.writeFileSync(filePath, buffer);
-      return `/uploads/logos/${filename}`;
+      const publicUrl = `/uploads/logos/${filename}`;
+
+      try {
+        let logosReg: Record<string, string> = {};
+        if (fs.existsSync(LOGOS_REGISTRY_FILE)) {
+          logosReg = JSON.parse(fs.readFileSync(LOGOS_REGISTRY_FILE, 'utf-8')) || {};
+        }
+        logosReg[publicUrl] = buffer.toString('base64');
+        fs.writeFileSync(LOGOS_REGISTRY_FILE, JSON.stringify(logosReg, null, 2), 'utf-8');
+      } catch (regErr) {
+        console.warn('Error saving logo to logos_registry:', regErr);
+      }
+
+      return publicUrl;
     } catch (err) {
       console.error('Error saving image to uploads:', err);
       return dataUrlOrBuffer;
@@ -783,11 +791,14 @@ class Database {
           ...primary,
         };
 
-        // Resolução absoluta de logotipo: verifica dados existentes, entidades mestre ou gera SVG de alta qualidade
-        const currentLogo =
-          (primary.logoUrl && primary.logoUrl.trim() !== '')
-            ? primary.logoUrl
-            : (secondary.logoUrl && secondary.logoUrl.trim() !== '' ? secondary.logoUrl : '');
+        // Resolução absoluta de logotipo: prioriza sempre imagem enviada pelo usuário sobre monograma fallback
+        const isFallbackLogo = (u?: string) => !u || u.trim() === '' || u.trim().endsWith('_logo.svg');
+        let currentLogo = (primary.logoUrl && primary.logoUrl.trim() !== '') ? primary.logoUrl.trim() : '';
+        if (isFallbackLogo(currentLogo) && !isFallbackLogo(secondary.logoUrl)) {
+          currentLogo = secondary.logoUrl!.trim();
+        } else if (!currentLogo && secondary.logoUrl && secondary.logoUrl.trim() !== '') {
+          currentLogo = secondary.logoUrl.trim();
+        }
         merged.logoUrl = currentLogo;
         merged.logoUrl = this.ensureClientHasLogo(merged);
 
@@ -1158,25 +1169,39 @@ class Database {
           const existing = this.data.clients[existingIdx];
           let updated = false;
 
-          // Preservar/atualizar logotipo do cliente
-          if (c.logoUrl && c.logoUrl.trim() !== '' && c.logoUrl !== existing.logoUrl) {
-            existing.logoUrl = c.logoUrl;
+          const isFallbackLogo = (u?: string) => !u || u.trim() === '' || u.trim().endsWith('_logo.svg');
+          const existingTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
+          const incomingTime = c.updatedAt ? new Date(c.updatedAt).getTime() : 0;
+
+          let incomingProcessedLogo = c.logoUrl ? c.logoUrl.trim() : '';
+          if (incomingProcessedLogo.startsWith('data:') || incomingProcessedLogo.startsWith('<svg')) {
+            incomingProcessedLogo = this.saveImageToUploads(incomingProcessedLogo, c.id);
+          }
+
+          // Se o cliente enviado possui um logo customizado real e o servidor só tem fallback, resgata o logo real
+          if (!isFallbackLogo(incomingProcessedLogo) && isFallbackLogo(existing.logoUrl) && incomingTime >= existingTime) {
+            existing.logoUrl = incomingProcessedLogo;
             updated = true;
           }
 
-          const existingTime = existing.updatedAt ? new Date(existing.updatedAt).getTime() : 0;
-          const incomingTime = c.updatedAt ? new Date(c.updatedAt).getTime() : 0;
-          if (incomingTime >= existingTime) {
+          // Apenas atualizar campos cadastrais via sync se o cache do cliente for estritamente mais recente que o servidor
+          if (incomingTime > existingTime) {
             const currentPassword = existing.password;
             const currentLogo = existing.logoUrl;
             Object.assign(existing, c);
             if (!existing.password && currentPassword) {
               existing.password = currentPassword;
             }
-            if ((!existing.logoUrl || existing.logoUrl.trim() === '') && currentLogo) {
+            // Nunca regredir um logo enviado real para um monograma fallback via sync de cache
+            if (!isFallbackLogo(currentLogo) && isFallbackLogo(incomingProcessedLogo)) {
               existing.logoUrl = currentLogo;
+            } else if (incomingProcessedLogo !== '') {
+              existing.logoUrl = incomingProcessedLogo;
+            } else if (currentLogo && currentLogo.trim() !== '') {
+              existing.logoUrl = currentLogo;
+            } else {
+              existing.logoUrl = this.ensureClientHasLogo(existing);
             }
-            existing.logoUrl = this.ensureClientHasLogo(existing);
             updated = true;
           }
 
@@ -1416,12 +1441,23 @@ class Database {
     if (clientData.accessPin) {
       newClient.accessPin = String(clientData.accessPin).trim();
     }
-    if (newClient.logoUrl) {
-      newClient.logoUrl = this.saveImageToUploads(newClient.logoUrl, `cli_${newClient.id}`);
+    if (newClient.logoUrl && newClient.logoUrl.trim() !== '') {
+      const trimmedLogo = newClient.logoUrl.trim();
+      if (trimmedLogo.startsWith('data:') || trimmedLogo.startsWith('<svg')) {
+        newClient.logoUrl = this.saveImageToUploads(trimmedLogo, newClient.id);
+      }
     }
-    newClient.logoUrl = this.ensureClientHasLogo(newClient);
+    if (!newClient.logoUrl || newClient.logoUrl.trim() === '') {
+      newClient.logoUrl = this.ensureClientHasLogo(newClient);
+    }
     this.data.clients.unshift(newClient);
     this.registerClient(newClient);
+    const masterIdx = MASTER_ADMIN_CREATED_ENTITIES.clients.findIndex((mc) => mc.id === newClient.id);
+    if (masterIdx >= 0) {
+      MASTER_ADMIN_CREATED_ENTITIES.clients[masterIdx] = { ...newClient };
+    } else {
+      MASTER_ADMIN_CREATED_ENTITIES.clients.push({ ...newClient });
+    }
     this.logHistory({
       action: 'client_created',
       title: 'Novo cliente cadastrado',
@@ -1440,18 +1476,29 @@ class Database {
 
     const existing = this.data.clients[index];
     let resolvedLogo = existing.logoUrl;
-    if (updates.logoUrl !== undefined && updates.logoUrl.trim() !== '') {
-      resolvedLogo = this.saveImageToUploads(updates.logoUrl, `cli_${id}`);
+    if (updates.logoUrl !== undefined) {
+      const trimmed = updates.logoUrl.trim();
+      if (trimmed !== '') {
+        if (trimmed.startsWith('data:') || trimmed.startsWith('<svg')) {
+          resolvedLogo = this.saveImageToUploads(trimmed, id);
+        } else {
+          resolvedLogo = trimmed;
+        }
+      } else {
+        resolvedLogo = '';
+      }
     }
 
     const updated: Client = {
       ...existing,
       ...updates,
-      logoUrl: resolvedLogo || existing.logoUrl || '',
+      logoUrl: resolvedLogo,
       id: existing.id,
       updatedAt: new Date().toISOString(),
     };
-    updated.logoUrl = this.ensureClientHasLogo(updated);
+    if (!updated.logoUrl || updated.logoUrl.trim() === '') {
+      updated.logoUrl = this.ensureClientHasLogo(updated);
+    }
 
     if (updates.password !== undefined && updates.password !== null) {
       const p = String(updates.password).trim();
@@ -1468,6 +1515,11 @@ class Database {
 
     this.data.clients[index] = updated;
     this.registerClient(updated);
+
+    const masterIdx = MASTER_ADMIN_CREATED_ENTITIES.clients.findIndex((mc) => mc.id === id);
+    if (masterIdx >= 0) {
+      MASTER_ADMIN_CREATED_ENTITIES.clients[masterIdx] = { ...updated };
+    }
 
     // Update client name inside qrcodes if name changed
     if (updates.name && updates.name !== existing.name) {

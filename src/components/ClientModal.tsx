@@ -214,7 +214,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
         contactPerson: contactPerson || name,
         email,
         phone,
-        logoUrl: logoUrl.trim() || undefined,
+        logoUrl: logoUrl.trim() !== '' ? logoUrl.trim() : '',
         password: password.trim() || undefined,
         postalCode: postalCode.replace(/[^\d]/g, ''),
         prefecture,

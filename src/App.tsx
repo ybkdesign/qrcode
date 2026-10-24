@@ -165,17 +165,18 @@ export default function App() {
             needsSyncToServer = true;
           } else {
             const serverC = finalClients[serverIdx];
-            // Se o cliente local possui logotipo e o servidor não possui -> PRESERVAR LOGOTIPO
-            if (
-              storedC.logoUrl &&
-              storedC.logoUrl.trim() !== '' &&
-              (!serverC.logoUrl || serverC.logoUrl.trim() === '')
-            ) {
-              finalClients[serverIdx] = {
-                ...serverC,
-                logoUrl: storedC.logoUrl,
-              };
-              needsSyncToServer = true;
+            const isFallback = (u?: string) => !u || u.trim() === '' || u.trim().endsWith('_logo.svg');
+            // Se o cliente local possui logotipo customizado real e o servidor tem apenas fallback/vazio -> PRESERVAR LOGOTIPO REAL
+            if (!isFallback(storedC.logoUrl) && isFallback(serverC.logoUrl)) {
+              const storedTime = storedC.updatedAt ? new Date(storedC.updatedAt).getTime() : 0;
+              const serverTime = serverC.updatedAt ? new Date(serverC.updatedAt).getTime() : 0;
+              if (storedTime >= serverTime) {
+                finalClients[serverIdx] = {
+                  ...serverC,
+                  logoUrl: storedC.logoUrl,
+                };
+                needsSyncToServer = true;
+              }
             }
           }
         });
@@ -580,7 +581,11 @@ export default function App() {
         ? stored.map((c: any) => (c.id === updated.id ? updated : c))
         : [updated, ...stored];
       localStorage.setItem('qr_persistent_clients_cache', JSON.stringify(nextStored));
-      api.syncCreatedEntities({ clients: [updated] }).catch(() => {});
+      try {
+        await api.syncCreatedEntities({ clients: [updated] });
+      } catch (syncErr) {
+        console.warn('Erro ao sincronizar cliente atualizado no servidor:', syncErr);
+      }
     } catch (err) {
       console.warn('Erro ao sincronizar sessão de autenticação após atualização:', err);
     }
@@ -845,7 +850,7 @@ export default function App() {
   // Active client object with linked QR codes
   const detailedClient = selectedClient
     ? {
-        ...selectedClient,
+        ...(clients.find((c) => c.id === selectedClient.id) || selectedClient),
         qrcodes: qrcodes.filter((q) => q.clientId === selectedClient.id),
       }
     : null;
